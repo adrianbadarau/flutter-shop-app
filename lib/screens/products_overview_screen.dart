@@ -3,6 +3,7 @@ import 'package:shop/config/mocks.dart';
 import 'package:shop/widgets/product_item.dart';
 
 class ProductsOverviewScreen extends StatelessWidget {
+  static const String routeName = "/";
   final loadedProducts = Mocks.getDummyProducts(0);
 
   @override
