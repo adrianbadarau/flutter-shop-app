@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:shop/config/mocks.dart';
 import 'package:shop/models/product.dart';
 
