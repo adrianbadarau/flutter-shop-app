@@ -13,13 +13,11 @@ class CartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var cartProvider = Provider.of<CartProvider>(context,listen: false);
+    var cartProvider = Provider.of<CartProvider>(context, listen: false);
     return Dismissible(
       key: ValueKey(id),
       background: Container(
-        color: Theme
-            .of(context)
-            .errorColor,
+        color: Theme.of(context).errorColor,
         child: Icon(
           Icons.delete,
           color: Colors.white,
@@ -38,9 +36,9 @@ class CartItem extends StatelessWidget {
             leading: CircleAvatar(
               child: FittedBox(
                   child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Text("\$ $price"),
-                  )),
+                padding: const EdgeInsets.all(5.0),
+                child: Text("\$ $price"),
+              )),
             ),
             title: Text(title),
             subtitle: Text("Total: \$${price * qty}"),
@@ -50,6 +48,27 @@ class CartItem extends StatelessWidget {
       ),
       onDismissed: (direction) {
         cartProvider.removeItem(productId);
+      },
+      confirmDismiss: (direction) {
+        return showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Text("Are you sure?"),
+                  content:
+                      Text("Do you want to remove the item from the cart?"),
+                  actions: [
+                    FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: Text("Cancel")),
+                    FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        child: Text("OK"))
+                  ],
+                ));
       },
     );
   }
