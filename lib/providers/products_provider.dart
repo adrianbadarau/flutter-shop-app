@@ -11,7 +11,8 @@ class ProductsProvider with ChangeNotifier {
       _items.where((element) => element.isFavorite).toList();
 
   void addProduct(Product product) {
-    final newProduct = Product(id: DateTime.now().toIso8601String(),
+    final newProduct = Product(
+        id: DateTime.now().toIso8601String(),
         title: product.title,
         description: product.description,
         price: product.price,
@@ -22,5 +23,12 @@ class ProductsProvider with ChangeNotifier {
 
   Product findById(String id) {
     return _items.firstWhere((element) => element.id == id);
+  }
+
+  void updateProduct(Product editedProduct) {
+    final index =
+        _items.indexWhere((element) => element.id == editedProduct.id);
+    _items[index] = editedProduct;
+    notifyListeners();
   }
 }
