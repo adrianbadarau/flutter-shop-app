@@ -29,26 +29,30 @@ class ProductItem extends StatelessWidget {
           ),
           backgroundColor: Colors.black87,
           leading: Consumer<Product>(
-            builder: (ctx, product, child) =>
-                IconButton(
-                  icon: Icon(
-                      (product.isFavorite) ? Icons.favorite : Icons
-                          .favorite_border,
-                      color: Theme
-                          .of(context)
-                          .accentColor),
-                  onPressed: () {
-                    product.toggleFavorite();
-                  },
-                ),
+            builder: (ctx, product, child) => IconButton(
+              icon: Icon(
+                  (product.isFavorite) ? Icons.favorite : Icons.favorite_border,
+                  color: Theme.of(context).accentColor),
+              onPressed: () {
+                product.toggleFavorite();
+              },
+            ),
           ),
           trailing: IconButton(
             icon:
-            Icon(Icons.shopping_cart, color: Theme
-                .of(context)
-                .accentColor),
+                Icon(Icons.shopping_cart, color: Theme.of(context).accentColor),
             onPressed: () {
               cart.addItem(product.id, product.price, product.title);
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text("Product added to cart"),
+                duration: Duration(seconds: 2),
+                action: SnackBarAction(
+                  label: "Undo",
+                  onPressed: () {
+                    cart.removeSingleItem(product.id);
+                  },
+                ),
+              ));
             },
           ),
         ),
