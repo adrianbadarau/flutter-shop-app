@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shop/models/product.dart';
+import 'package:shop/providers/products_provider.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = "/editProduct";
@@ -13,7 +15,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
   var _editedProduct =
-      Product(id: null, title: "", description: "", price: 0.0, imageUrl: "");
+  Product(id: null,
+      title: "",
+      description: "",
+      price: 0.0,
+      imageUrl: "");
 
   @override
   Widget build(BuildContext context) {
@@ -99,11 +105,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     child: _imageUrlController.text.isEmpty
                         ? Text("Enter an Url")
                         : FittedBox(
-                            child: Image.network(
-                              _imageUrlController.text,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                      child: Image.network(
+                        _imageUrlController.text,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -149,11 +155,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   void _saveFrom() {
-    final isValid = _form.currentState.validate();
-    if (!isValid) {
+    if (!_form.currentState.validate()) {
       return;
     }
+    final productsProvider =
+    Provider.of<ProductsProvider>(context, listen: false);
     _form.currentState.save();
+    productsProvider.addProduct(_editedProduct);
   }
 
   @override
