@@ -40,11 +40,29 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         price: _editedProduct.price,
                         imageUrl: _editedProduct.imageUrl);
                   },
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Field can't be empty";
+                    }
+                    return null;
+                  },
                 ),
                 TextFormField(
                     decoration: InputDecoration(labelText: "Price"),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return "Field can't be empty";
+                      }
+                      if (double.tryParse(value) == null) {
+                        return "Please enter a valid nr.";
+                      }
+                      if (double.parse(value) <= 0.0) {
+                        return "Price has to be > 0";
+                      }
+                      return null;
+                    },
                     onSaved: (value) {
                       _editedProduct = Product(
                           id: _editedProduct.id,
@@ -57,6 +75,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     decoration: InputDecoration(labelText: "Description"),
                     keyboardType: TextInputType.multiline,
                     maxLines: 3,
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return "Field can't be empty";
+                      }
+                      return null;
+                    },
                     onSaved: (value) {
                       _editedProduct = Product(
                           id: _editedProduct.id,
@@ -94,6 +118,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         onFieldSubmitted: (value) {
                           _saveFrom();
                         },
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return "Field can't be empty";
+                          }
+                          return null;
+                        },
                         onSaved: (value) {
                           _editedProduct = Product(
                               id: _editedProduct.id,
@@ -119,6 +149,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   void _saveFrom() {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
     _form.currentState.save();
   }
 
