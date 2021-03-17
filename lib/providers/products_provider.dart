@@ -6,7 +6,8 @@ import 'package:shop/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  var dbUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com', '/products.json');
+  var dbUrl = Uri.https(
+      'flutter-shop-57d7b-default-rtdb.firebaseio.com', '/products.json');
   List<Product> _items = Mocks.getDummyProducts(10);
 
   List<Product> get items => [..._items];
@@ -15,14 +16,15 @@ class ProductsProvider with ChangeNotifier {
       _items.where((element) => element.isFavorite).toList();
 
   void addProduct(Product product) {
-    final newProduct = Product(
-        id: DateTime.now().toIso8601String(),
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        imageUrl: product.imageUrl);
-    _items.add(newProduct);
-    http.post(dbUrl,body: json.encode(product));
+    http.post(dbUrl, body: json.encode(product)).then((value) {
+      var newProduct = Product(
+          id: jsonDecode(value.body)['name'],
+          title: product.title,
+          description: product.description,
+          price: product.price,
+          imageUrl: product.imageUrl);
+      _items.add(newProduct);
+    });
     notifyListeners();
   }
 
