@@ -15,8 +15,9 @@ class ProductsProvider with ChangeNotifier {
   List<Product> get favoriteItems =>
       _items.where((element) => element.isFavorite).toList();
 
-  void addProduct(Product product) {
-    http.post(dbUrl, body: json.encode(product)).then((value) {
+  Future<void> addProduct(Product product) async {
+    try {
+      var value = await http.post(dbUrl, body: json.encode(product));
       var newProduct = Product(
           id: jsonDecode(value.body)['name'],
           title: product.title,
@@ -24,8 +25,11 @@ class ProductsProvider with ChangeNotifier {
           price: product.price,
           imageUrl: product.imageUrl);
       _items.add(newProduct);
-    });
-    notifyListeners();
+      notifyListeners();
+    } catch (e) {
+      print(e);
+      throw e;
+    }
   }
 
   Product findById(String id) {
