@@ -6,7 +6,7 @@ import 'package:shop/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  var dbUrl = Uri.https(
+  final dbUrl = Uri.https(
       'flutter-shop-57d7b-default-rtdb.firebaseio.com', '/products.json');
   List<Product> _items = [];
 
@@ -37,7 +37,8 @@ class ProductsProvider with ChangeNotifier {
     final extractedData = jsonDecode(resp.body) as Map<String, dynamic>;
     final List<Product> loadedProducts = [];
     extractedData.forEach((key, value) {
-      loadedProducts.add(Product(id: key,
+      loadedProducts.add(Product(
+          id: key,
           title: value['title'],
           description: value['description'],
           price: value['price'],
@@ -51,9 +52,12 @@ class ProductsProvider with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  void updateProduct(Product editedProduct) {
+  Future<void> updateProduct(Product editedProduct) async {
+    final dbUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com',
+        '/products/${editedProduct.id}.json');
+    await http.patch(dbUrl, body: jsonEncode(editedProduct));
     final index =
-    _items.indexWhere((element) => element.id == editedProduct.id);
+        _items.indexWhere((element) => element.id == editedProduct.id);
     _items[index] = editedProduct;
     notifyListeners();
   }
