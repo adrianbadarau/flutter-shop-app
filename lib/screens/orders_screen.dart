@@ -10,22 +10,26 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var ordersProvider = Provider.of<OrdersProvider>(context);
-    ordersProvider.refreshOrdersFromServer();
     return Scaffold(
       appBar: AppBar(
         title: Text("Your orders"),
       ),
       drawer: AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh: () => _refreshItems(context),
-        child: ListView.builder(
-          itemBuilder: (ctx, index) {
-            return OrderItem(
-              orderItem: ordersProvider.orders[index],
-            );
-          },
-          itemCount: ordersProvider.orders.length,
-        ),
+      body: FutureBuilder(
+        future: ordersProvider.refreshOrdersFromServer(),
+        builder: (context, data) {
+          return RefreshIndicator(
+            onRefresh: () => _refreshItems(context),
+            child: ListView.builder(
+              itemBuilder: (ctx, index) {
+                return OrderItem(
+                  orderItem: ordersProvider.orders[index],
+                );
+              },
+              itemCount: ordersProvider.orders.length,
+            ),
+          );
+        },
       ),
     );
   }
