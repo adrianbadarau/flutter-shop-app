@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shop/config/mocks.dart';
+import 'package:shop/models/http_exception.dart';
 import 'package:shop/models/product.dart';
 import 'package:http/http.dart' as http;
 
@@ -63,6 +64,13 @@ class ProductsProvider with ChangeNotifier {
   }
 
   void delete(String id) {
+    final dbUrl = Uri.https(
+        'flutter-shop-57d7b-default-rtdb.firebaseio.com', '/products/$id.json');
+    http.delete(dbUrl).then((resp) {
+      if(resp.statusCode >= 200){
+        throw HttpException('Could not delete product');
+      }
+    });
     _items.removeWhere((element) => element.id == id);
     notifyListeners();
   }
