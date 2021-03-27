@@ -10,7 +10,7 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var ordersProvider = Provider.of<OrdersProvider>(context);
-    // ordersProvider.refreshOrdersFromServer();
+    ordersProvider.refreshOrdersFromServer();
     return Scaffold(
       appBar: AppBar(
         title: Text("Your orders"),
