@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop/models/http_exception.dart';
 import 'package:shop/providers/auth_provider.dart';
 
 enum AuthMode { Signup, Login }
@@ -99,7 +100,23 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  void _submit() async{
+  void _showErrorDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Error occurred'),
+              content: Text(message),
+              actions: [
+                FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('OK'))
+              ],
+            ));
+  }
+
+  void _submit() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     if (!_formKey.currentState.validate()) {
@@ -110,12 +127,28 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-      await authProvider.signIn(_authData['email'], _authData['password']);
-    } else {
-      // Sign user up
-      await authProvider.signUp(_authData['email'], _authData['password']);
+    try {
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await authProvider.signIn(_authData['email'], _authData['password']);
+      } else {
+        // Sign user up
+        await authProvider.signUp(_authData['email'], _authData['password']);
+      }
+    } on HttpException catch (e) {
+      var errorMessage = 'Authentication failed';
+      if (e.toString().contains('EMAIL_EXISTS')) {
+        errorMessage = 'The email address is already in use by another account';
+      } else if (e.toString().contains('INVALID_EMAIL')) {
+        errorMessage = 'This email is invalid';
+      } else if (e.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage = 'There is no user record corresponding to this identifier. The user may have been deleted.';
+      } else if (e.toString().contains('INVALID_PASSWORD')) {
+        errorMessage = 'The password is invalid or the user does not have a password';
+      }
+      _showErrorDialog(errorMessage);
+    } catch (e) {
+      const errorMessage = 'Could not authenticate you, please try again later';
     }
     setState(() {
       _isLoading = false;
