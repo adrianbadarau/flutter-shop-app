@@ -10,6 +10,7 @@ class Product with ChangeNotifier {
   final double price;
   final String imageUrl;
   bool isFavorite;
+  final String userId;
 
   Product({
     @required this.id,
@@ -18,15 +19,16 @@ class Product with ChangeNotifier {
     @required this.price,
     @required this.imageUrl,
     this.isFavorite = false,
+    this.userId,
   });
 
-  Future<void> toggleFavorite(String token) async {
+  Future<void> toggleFavorite(String token, String userId) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final dbUrl = Uri.https(
-        'flutter-shop-57d7b-default-rtdb.firebaseio.com', '/products/$id.json').replace(queryParameters: {'auth':token});
-    final resp = await http.patch(dbUrl, body: jsonEncode(this));
+    final dbUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com', 'userFavorites/$userId/$id.json')
+        .replace(queryParameters: {'auth': token});
+    final resp = await http.put(dbUrl, body: jsonEncode({'isFavorite': isFavorite}));
     if (resp.statusCode >= 400) {
       isFavorite = oldStatus;
     }
@@ -38,12 +40,6 @@ class Product with ChangeNotifier {
   }
 
   Map toJson() {
-    return {
-      'title': title,
-      'description': description,
-      'price': price,
-      'imageUrl': imageUrl,
-      'isFavorite': isFavorite
-    };
+    return {'title': title, 'description': description, 'price': price, 'imageUrl': imageUrl, 'userId': userId};
   }
 }
