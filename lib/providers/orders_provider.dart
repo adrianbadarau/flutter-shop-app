@@ -18,15 +18,18 @@ class OrderItem {
 }
 
 class OrdersProvider with ChangeNotifier {
+  final String authToken;
   final dbUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com', '/orders.json');
   List<OrderItem> _orders = [];
+
+  OrdersProvider(this.authToken, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> refreshOrdersFromServer() async {
-    final resp = await http.get(dbUrl);
+    final resp = await http.get(dbUrl.replace(queryParameters: {'auth': authToken}));
     final List<OrderItem> ordersList = [];
     final data = jsonDecode(resp.body) as Map<String, dynamic>;
     data.forEach((id, orderData) {
@@ -49,7 +52,7 @@ class OrdersProvider with ChangeNotifier {
       createdAt: DateTime.now(),
     );
     try {
-      final resp = await http.post(dbUrl, body: jsonEncode(order));
+      final resp = await http.post(dbUrl.replace(queryParameters: {'auth': authToken}), body: jsonEncode(order));
       _orders.insert(
           0, OrderItem(amount: order.amount, products: order.products, createdAt: order.createdAt, id: jsonDecode(resp.body)['name']));
       notifyListeners();

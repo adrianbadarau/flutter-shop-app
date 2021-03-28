@@ -9,6 +9,17 @@ class AuthProvider with ChangeNotifier {
   DateTime _expireDate;
   String _userId;
 
+  bool get isAuth {
+    return (token != null);
+  }
+
+  String get token {
+    if (_expireDate != null && _expireDate.isAfter(DateTime.now()) && _token != null) {
+      return _token;
+    }
+    return null;
+  }
+
   Future<void> signUp(String email, String password) async {
     return _authenticate(email, password, 'signUp');
   }
@@ -24,7 +35,9 @@ class AuthProvider with ChangeNotifier {
       final data = jsonDecode(resp.body);
       if (data['error'] == null) {
         _token = data['idToken'];
-        print(jsonDecode(resp.body));
+        _userId = data['localId'];
+        _expireDate = DateTime.now().add(Duration(seconds: int.parse(data['expiresIn'])));
+        notifyListeners();
       } else {
         throw HttpException(data['error']['message']);
       }
