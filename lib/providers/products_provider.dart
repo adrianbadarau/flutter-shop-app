@@ -37,14 +37,22 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAndSetProducts() async {
-    final resp = await http.get(dbUrl.replace(queryParameters: {'auth': authToken}));
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    var productsEndpoint = dbUrl.replace(queryParameters: {'auth': authToken});
+    if (filterByUser) {
+      productsEndpoint = productsEndpoint.replace(queryParameters: {
+        'auth': authToken,
+        'orderBy': '"userId"',
+        'equalTo': '"$userId"',
+      });
+    }
+    final resp = await http.get(productsEndpoint);
     final extractedData = jsonDecode(resp.body) as Map<String, dynamic>;
     final List<Product> loadedProducts = [];
     final favoritesUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com', 'userFavorites/$userId.json')
         .replace(queryParameters: {'auth': authToken});
     final favoritesResp = await http.get(favoritesUrl);
-    final favoritesData = jsonDecode(favoritesResp.body);
+    final favoritesData = jsonDecode(favoritesResp.body) ?? {};
     extractedData.forEach((key, value) {
       loadedProducts.add(
         Product(
@@ -53,11 +61,12 @@ class ProductsProvider with ChangeNotifier {
             description: value['description'],
             price: value['price'],
             imageUrl: value['imageUrl'],
-            isFavorite: favoritesData[key]['isFavorite'],
+            isFavorite: favoritesData[key] != null ? favoritesData[key]['isFavorite'] : false,
             userId: value['userId']),
       );
     });
     _items = loadedProducts;
+    notifyListeners();
   }
 
   Product findById(String id) {
