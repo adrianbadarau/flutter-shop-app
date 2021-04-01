@@ -49,4 +49,11 @@ class AuthProvider with ChangeNotifier {
       throw e;
     }
   }
+
+  void logout(){
+    _token = null;
+    _userId = null;
+    _expireDate = null;
+    notifyListeners();
+  }
 }
