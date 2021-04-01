@@ -21,26 +21,29 @@ class OrdersProvider with ChangeNotifier {
   final String authToken;
   final dbUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com', '/orders.json');
   List<OrderItem> _orders = [];
+  final String userId;
 
-  OrdersProvider(this.authToken, this._orders);
+  OrdersProvider(this.authToken, this.userId, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> refreshOrdersFromServer() async {
-    final resp = await http.get(dbUrl.replace(queryParameters: {'auth': authToken}));
+    final resp = await http.get(dbUrl.replace(path: "/orders/$userId.json",queryParameters: {'auth': authToken}));
     final List<OrderItem> ordersList = [];
     final data = jsonDecode(resp.body) as Map<String, dynamic>;
-    data.forEach((id, orderData) {
-      final List<CartItem> products = [];
-      final serverItems = orderData['products'] as List<dynamic>;
-      serverItems.forEach((element) {
-        products.add(CartItem(id: element['id'], title: element['title'], quantity: element['quantity'], price: element['price']));
+    if(data!=null){
+      data.forEach((id, orderData) {
+        final List<CartItem> products = [];
+        final serverItems = orderData['products'] as List<dynamic>;
+        serverItems.forEach((element) {
+          products.add(CartItem(id: element['id'], title: element['title'], quantity: element['quantity'], price: element['price']));
+        });
+        ordersList.add(OrderItem(
+            amount: orderData['amount'], products: products, createdAt: DateTime.parse(orderData['createdAt']), id: orderData['id']));
       });
-      ordersList.add(OrderItem(
-          amount: orderData['amount'], products: products, createdAt: DateTime.parse(orderData['createdAt']), id: orderData['id']));
-    });
+    }
     _orders = ordersList;
     notifyListeners();
   }
@@ -52,7 +55,7 @@ class OrdersProvider with ChangeNotifier {
       createdAt: DateTime.now(),
     );
     try {
-      final resp = await http.post(dbUrl.replace(queryParameters: {'auth': authToken}), body: jsonEncode(order));
+      final resp = await http.post(dbUrl.replace(path: "/orders/$userId.json",queryParameters: {'auth': authToken}), body: jsonEncode(order));
       _orders.insert(
           0, OrderItem(amount: order.amount, products: order.products, createdAt: order.createdAt, id: jsonDecode(resp.body)['name']));
       notifyListeners();
