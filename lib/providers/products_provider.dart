@@ -6,10 +6,10 @@ import 'package:shop/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  final String authToken;
-  final String userId;
+  String authToken;
+  String userId;
 
-  ProductsProvider(this.authToken, this.userId, this._items);
+  ProductsProvider();
 
   final dbUrl = Uri.https('flutter-shop-57d7b-default-rtdb.firebaseio.com', '/products.json');
   List<Product> _items = [];
